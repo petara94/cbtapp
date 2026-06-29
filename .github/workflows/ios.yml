@@ -1,0 +1,99 @@
+name: iOS Build
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (iOS Simulator)
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select latest Xcode
+        run: |
+          # Use the newest installed Xcode so its simulator SDK matches an
+          # installed simulator runtime (avoids actool runtime-mismatch errors).
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$LATEST" ]; then LATEST=/Applications/Xcode.app; fi
+          echo "Selecting $LATEST"
+          sudo xcode-select -switch "$LATEST"
+
+      - name: Show versions
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build for simulator (unsigned)
+        run: |
+          xcodebuild \
+            -project CBTDiary.xcodeproj \
+            -scheme CBTDiary \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Locate built .app
+        id: app
+        run: |
+          APP_PATH=$(find build/Build/Products -name "*.app" -maxdepth 3 -type d | head -1)
+          echo "Built: $APP_PATH"
+          echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload .app artifact (simulator)
+        uses: actions/upload-artifact@v4
+        with:
+          name: CBTDiary-app-simulator-unsigned
+          path: ${{ steps.app.outputs.path }}
+          if-no-files-found: error
+
+      # ---- Unsigned device .ipa for sideloading (Sideloadly / AltStore) ----
+      # Builds for a real iPhone without code signing and packages a plain
+      # Payload/*.ipa. Install it from a PC with Sideloadly or AltStore: the
+      # tool re-signs the app with your own Apple ID. No Mac required.
+
+      - name: Build for device (unsigned)
+        run: |
+          xcodebuild \
+            -project CBTDiary.xcodeproj \
+            -scheme CBTDiary \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath build-device \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Package unsigned .ipa
+        id: ipa
+        run: |
+          APP_PATH=$(find build-device/Build/Products -name "*.app" -maxdepth 3 -type d | head -1)
+          echo "Packaging: $APP_PATH"
+          rm -rf Payload CBTDiary.ipa
+          mkdir Payload
+          cp -R "$APP_PATH" Payload/
+          # Strip the simulator-only stub dylib if present (device builds are clean already).
+          zip -qry CBTDiary.ipa Payload
+          ls -la CBTDiary.ipa
+
+      - name: Upload unsigned .ipa (sideload)
+        uses: actions/upload-artifact@v4
+        with:
+          name: CBTDiary-ipa-unsigned
+          path: CBTDiary.ipa
+          if-no-files-found: error
