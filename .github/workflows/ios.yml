@@ -27,15 +27,6 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Resolve simulator destination
-        id: sim
-        run: |
-          # Pick an available iOS 18 iPhone simulator (any runtime that exists on the runner).
-          DEVICE=$(xcrun simctl list devices available | grep -E "iPhone 16( Pro)?" | head -1 | sed -E 's/ *\(([-0-9A-F]+)\).*//' | sed -E 's/^ *//')
-          if [ -z "$DEVICE" ]; then DEVICE="iPhone 16"; fi
-          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
-          echo "Using simulator: $DEVICE"
-
       - name: Build for simulator (unsigned)
         working-directory: CBTDiary
         run: |
@@ -43,7 +34,8 @@ jobs:
             -project CBTDiary.xcodeproj \
             -scheme CBTDiary \
             -configuration Debug \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
