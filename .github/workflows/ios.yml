@@ -1,0 +1,66 @@
+name: iOS Build
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build (iOS Simulator)
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: sudo xcode-select -switch /Applications/Xcode_16.app
+
+      - name: Show versions
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Resolve simulator destination
+        id: sim
+        run: |
+          # Pick an available iOS 18 iPhone simulator (any runtime that exists on the runner).
+          DEVICE=$(xcrun simctl list devices available | grep -E "iPhone 16( Pro)?" | head -1 | sed -E 's/ *\(([-0-9A-F]+)\).*//' | sed -E 's/^ *//')
+          if [ -z "$DEVICE" ]; then DEVICE="iPhone 16"; fi
+          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
+          echo "Using simulator: $DEVICE"
+
+      - name: Build for simulator (unsigned)
+        working-directory: CBTDiary
+        run: |
+          xcodebuild \
+            -project CBTDiary.xcodeproj \
+            -scheme CBTDiary \
+            -configuration Debug \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.device }}" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: Locate built .app
+        id: app
+        working-directory: CBTDiary
+        run: |
+          APP_PATH=$(find build/Build/Products -name "*.app" -maxdepth 3 -type d | head -1)
+          echo "Built: $APP_PATH"
+          echo "path=CBTDiary/$APP_PATH" >> "$GITHUB_OUTPUT"
+
+      - name: Upload .app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CBTDiary-app-unsigned
+          path: ${{ steps.app.outputs.path }}
+          if-no-files-found: error
