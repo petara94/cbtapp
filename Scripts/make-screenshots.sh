@@ -39,15 +39,15 @@ SRC="$DATA/Library/Caches/Screenshots"
 
 mkdir -p Screenshots
 # 4 экрана для баннера README: Сегодня → создание (дата/время) → чувства → Узоры
-SHOTS=(06-today-with-entry 02-step-event 05-step-intensity 08-patterns)
+SHOTS=(07-today-with-entry 02-step-event 05-step-intensity 09-patterns)
 for s in "${SHOTS[@]}"; do cp "$SRC/$s.png" Screenshots/; done
 
 # Склеиваем их по горизонтали в одно фото для README.
 xcrun swift Scripts/stitch.swift Screenshots/overview.png \
-  Screenshots/06-today-with-entry.png \
+  Screenshots/07-today-with-entry.png \
   Screenshots/02-step-event.png \
   Screenshots/05-step-intensity.png \
-  Screenshots/08-patterns.png
+  Screenshots/09-patterns.png
 
 echo "Готово. Обновлены ./Screenshots/*.png и overview.png"
 ls Screenshots/

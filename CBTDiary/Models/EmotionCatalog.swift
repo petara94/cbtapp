@@ -42,10 +42,18 @@ final class EmotionOption {
 }
 
 enum EmotionCatalog {
-    /// Заполняет каталог дефолтными разделами при первом запуске.
+    /// Флаг разового досева раздела телесных наблюдений.
+    private static let bodySeededKey = "emotionCatalog.bodySeeded.v1"
+
+    /// Заполняет каталог дефолтными разделами при первом запуске, а для уже
+    /// существующих каталогов один раз досеивает раздел «Тело».
     static func seedIfNeeded(_ context: ModelContext) {
-        let existing = (try? context.fetchCount(FetchDescriptor<EmotionCategory>())) ?? 0
-        guard existing == 0 else { return }
+        let existing = (try? context.fetch(FetchDescriptor<EmotionCategory>())) ?? []
+
+        guard existing.isEmpty else {
+            seedBodyIfNeeded(context, existing: existing)
+            return
+        }
 
         for (ci, group) in Content.emotionGroups.enumerated() {
             let category = EmotionCategory(name: group.label, sortOrder: ci)
@@ -54,6 +62,28 @@ enum EmotionCatalog {
                 let option = EmotionOption(name: name, sortOrder: oi, category: category)
                 context.insert(option)
             }
+        }
+        try? context.save()
+        // Свежий каталог уже содержит «Тело» — отмечаем, чтобы не досеивать повторно.
+        UserDefaults.standard.set(true, forKey: bodySeededKey)
+    }
+
+    /// Одноразовый досев раздела «Тело» пользователям, чей каталог был создан
+    /// до его появления. Уважает удаление: после установки флага раздел
+    /// больше не возвращается, даже если пользователь его удалит.
+    private static func seedBodyIfNeeded(_ context: ModelContext, existing: [EmotionCategory]) {
+        guard !UserDefaults.standard.bool(forKey: bodySeededKey) else { return }
+        UserDefaults.standard.set(true, forKey: bodySeededKey)
+
+        let group = Content.bodyGroup
+        guard !existing.contains(where: { $0.name == group.label }) else { return }
+
+        let order = (existing.map(\.sortOrder).max() ?? -1) + 1
+        let category = EmotionCategory(name: group.label, sortOrder: order)
+        context.insert(category)
+        for (oi, name) in group.items.enumerated() {
+            let option = EmotionOption(name: name, sortOrder: oi, category: category)
+            context.insert(option)
         }
         try? context.save()
     }

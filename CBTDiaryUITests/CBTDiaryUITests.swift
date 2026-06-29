@@ -44,9 +44,15 @@ final class CBTDiaryUITests: XCTestCase {
         tap(app.buttons["Тревога"])
         tap(app.buttons["Стыд"])
         snap("step-intensity")
+        tap(app.buttons["Дальше"])
+
+        // 5) Шаг «Заметка»: свободный текст.
+        type(intoFirstTextView: "Это повторяется каждый раз перед публичными выступлениями")
+        snap("step-note")
+        dismissKeyboard()
         tapButton(containing: "Сохран")
 
-        // 5) «Сегодня» с первой записью.
+        // 6) «Сегодня» с первой записью.
         XCTAssertTrue(app.buttons["Дневник"].waitForExistence(timeout: 10))
         snap("today-with-entry")
 
@@ -55,21 +61,21 @@ final class CBTDiaryUITests: XCTestCase {
                    thought: "Я им безразличен",
                    feeling: "Грусть")
 
-        // 6) «Дневник».
+        // 7) «Дневник».
         tap(app.buttons["Дневник"])
         snap("journal")
 
-        // 7) «Узоры».
+        // 8) «Узоры».
         tap(app.buttons["Узоры"])
         snap("patterns")
 
-        // 8) «Настройки» — каталог эмоций.
+        // 9) «Настройки» — каталог эмоций.
         tap(app.buttons["Сегодня"])
         tap(app.buttons["Настройки"])
         XCTAssertTrue(app.cells.firstMatch.waitForExistence(timeout: 10))
         snap("settings")
 
-        // 9) Редактор раздела (тап по названию раздела открывает редактор эмоций).
+        // 10) Редактор раздела (тап по названию раздела открывает редактор эмоций).
         let category = app.staticTexts["Тревожные"]
         XCTAssertTrue(category.waitForExistence(timeout: 10), "Нет раздела «Тревожные»")
         category.tap()
@@ -88,6 +94,7 @@ final class CBTDiaryUITests: XCTestCase {
         dismissKeyboard()
         tap(app.buttons["Дальше"])
         tap(app.buttons[feeling])
+        tap(app.buttons["Дальше"])
         tapButton(containing: "Сохран")
         XCTAssertTrue(app.buttons["Дневник"].waitForExistence(timeout: 10))
     }

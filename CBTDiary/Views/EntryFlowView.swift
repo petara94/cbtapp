@@ -17,6 +17,7 @@ struct EntryFlowView: View {
     @State private var createdAt: Date
     @State private var event: String
     @State private var thought: String
+    @State private var note: String
     @State private var feelings: [String: Int]   // name -> intensity
 
     @FocusState private var fieldFocused: Bool
@@ -33,13 +34,14 @@ struct EntryFlowView: View {
         _createdAt = State(initialValue: editing?.createdAt ?? Date())
         _event = State(initialValue: editing?.event ?? "")
         _thought = State(initialValue: editing?.thought ?? "")
+        _note = State(initialValue: editing?.note ?? "")
         var map: [String: Int] = [:]
         for f in editing?.feelings ?? [] { map[f.name] = f.intensity }
         _feelings = State(initialValue: map)
     }
 
     private var isEditing: Bool { editing != nil }
-    private var isLast: Bool { step == .feeling }
+    private var isLast: Bool { step == .note }
     private var canEvent: Bool { !event.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     /// Выбранные эмоции в порядке каталога, плюс «осиротевшие» (удалённые из каталога).
@@ -137,6 +139,8 @@ struct EntryFlowView: View {
                 textField(text: $thought)
             case .feeling:
                 feelingPicker
+            case .note:
+                textField(text: $note)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -360,10 +364,12 @@ struct EntryFlowView: View {
     private func save() {
         let trimmedEvent = event.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedThought = thought.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if let entry = editing {
             entry.event = trimmedEvent
             entry.thought = trimmedThought
+            entry.note = trimmedNote
             entry.createdAt = createdAt
             for f in entry.feelings ?? [] { context.delete(f) }
             entry.feelings = feelings.map { Feeling(name: $0.key, intensity: $0.value) }
@@ -372,6 +378,7 @@ struct EntryFlowView: View {
                 createdAt: createdAt,
                 event: trimmedEvent,
                 thought: trimmedThought,
+                note: trimmedNote,
                 feelings: feelings.map { Feeling(name: $0.key, intensity: $0.value) }
             )
             context.insert(entry)
@@ -405,6 +412,7 @@ struct EntryFlowView: View {
         case .event: return Palette.event
         case .thought: return Palette.thought
         case .feeling: return Palette.feeling
+        case .note: return Palette.note
         }
     }
 }
