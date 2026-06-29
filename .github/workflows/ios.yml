@@ -18,8 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16
-        run: sudo xcode-select -switch /Applications/Xcode_16.app
+      - name: Select latest Xcode
+        run: |
+          # Use the newest installed Xcode so its simulator SDK matches an
+          # installed simulator runtime (avoids actool runtime-mismatch errors).
+          LATEST=$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$LATEST" ]; then LATEST=/Applications/Xcode.app; fi
+          echo "Selecting $LATEST"
+          sudo xcode-select -switch "$LATEST"
 
       - name: Show versions
         run: |
