@@ -3,6 +3,8 @@ import SwiftUI
 struct TodayView: View {
     let entries: [Entry]
     let onCompose: () -> Void
+    let onEdit: (Entry) -> Void
+    let onSettings: () -> Void
 
     private var today: [Entry] {
         entries.filter { DateText.sameDay($0.createdAt, Date()) }
@@ -12,14 +14,26 @@ struct TodayView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 // Заголовок.
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(DateText.fullDate(Date()).uppercased())
-                        .font(.sans(12, weight: .semibold))
-                        .tracking(1.5)
-                        .foregroundStyle(Palette.inkFaint)
-                    Text(DateText.greeting())
-                        .font(.serif(28))
-                        .foregroundStyle(Palette.ink)
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(DateText.fullDate(Date()).uppercased())
+                            .font(.sans(12, weight: .semibold))
+                            .tracking(1.5)
+                            .foregroundStyle(Palette.inkFaint)
+                        Text(DateText.greeting())
+                            .font(.serif(28))
+                            .foregroundStyle(Palette.ink)
+                    }
+                    Spacer(minLength: 12)
+                    Button(action: onSettings) {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 20, weight: .regular))
+                            .foregroundStyle(Palette.inkSoft)
+                            .frame(width: 40, height: 40)
+                            .background(Palette.card, in: Circle())
+                            .overlay(Circle().stroke(Palette.line, lineWidth: 1))
+                    }
+                    .accessibilityLabel("Настройки")
                 }
                 .padding(.bottom, 18)
 
@@ -43,7 +57,7 @@ struct TodayView: View {
                     SectionTitle("Сегодня").padding(.top, 26).padding(.bottom, 12)
                     VStack(spacing: 12) {
                         ForEach(today, id: \.persistentModelID) { entry in
-                            EntryCardView(entry: entry)
+                            EntryCardView(entry: entry, onEdit: onEdit)
                         }
                     }
                 }

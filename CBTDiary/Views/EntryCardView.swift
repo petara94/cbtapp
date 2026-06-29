@@ -3,6 +3,7 @@ import SwiftUI
 /// Карточка-«нить»: событие → мысль → чувство с вертикальной линией.
 struct EntryCardView: View {
     let entry: Entry
+    var onEdit: ((Entry) -> Void)?
     var onDelete: ((Entry) -> Void)?
 
     var body: some View {
@@ -13,15 +14,27 @@ struct EntryCardView: View {
                     .font(.sans(12, weight: .semibold))
                     .foregroundStyle(Palette.inkFaint)
                 Spacer()
-                if let onDelete {
-                    Button {
-                        onDelete(entry)
-                    } label: {
-                        Image(systemName: "trash")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Palette.inkFaint)
+                HStack(spacing: 16) {
+                    if let onEdit {
+                        Button {
+                            onEdit(entry)
+                        } label: {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Palette.inkFaint)
+                        }
+                        .accessibilityLabel("Изменить запись")
                     }
-                    .accessibilityLabel("Удалить запись")
+                    if let onDelete {
+                        Button {
+                            onDelete(entry)
+                        } label: {
+                            Image(systemName: "trash")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Palette.inkFaint)
+                        }
+                        .accessibilityLabel("Удалить запись")
+                    }
                 }
             }
 

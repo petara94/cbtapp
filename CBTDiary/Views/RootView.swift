@@ -11,7 +11,22 @@ struct RootView: View {
     @Environment(\.modelContext) private var context
 
     @State private var tab: Tab = .today
-    @State private var composing = false
+    @State private var sheet: ActiveSheet?
+
+    /// Что показываем в модальном листе.
+    private enum ActiveSheet: Identifiable {
+        case compose
+        case settings
+        case edit(Entry)
+
+        var id: String {
+            switch self {
+            case .compose: return "compose"
+            case .settings: return "settings"
+            case .edit(let entry): return "edit-\(entry.persistentModelID.hashValue)"
+            }
+        }
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -21,9 +36,19 @@ struct RootView: View {
             Group {
                 switch tab {
                 case .today:
-                    TodayView(entries: entries) { composing = true }
+                    TodayView(
+                        entries: entries,
+                        onCompose: { sheet = .compose },
+                        onEdit: { sheet = .edit($0) },
+                        onSettings: { sheet = .settings }
+                    )
                 case .journal:
-                    JournalView(entries: entries, onCompose: { composing = true }, onDelete: delete)
+                    JournalView(
+                        entries: entries,
+                        onCompose: { sheet = .compose },
+                        onEdit: { sheet = .edit($0) },
+                        onDelete: delete
+                    )
                 case .patterns:
                     PatternsView(entries: entries)
                 }
@@ -35,16 +60,20 @@ struct RootView: View {
 
             TabBar(tab: $tab)
         }
-        .sheet(isPresented: $composing) {
-            EntryFlowView { newEntry in
-                context.insert(newEntry)
-                tab = .today
+        .sheet(item: $sheet) { route in
+            switch route {
+            case .compose:
+                EntryFlowView { tab = .today }
+            case .edit(let entry):
+                EntryFlowView(editing: entry)
+            case .settings:
+                SettingsView()
             }
         }
     }
 
     private var fab: some View {
-        Button(action: { composing = true }) {
+        Button(action: { sheet = .compose }) {
             Image(systemName: "plus")
                 .font(.system(size: 24, weight: .semibold))
                 .foregroundStyle(.white)
