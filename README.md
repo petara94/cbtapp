@@ -35,6 +35,23 @@
 Подпись бесплатного аккаунта действует 7 дней — потом приложение нужно
 переустановить из Xcode. Данные хранятся локально на устройстве.
 
+## Установка на iPhone без Mac (sideload)
+
+CI на каждый push собирает **неподписанный `.ipa` под устройство** и кладёт его
+в артефакт `CBTDiary-ipa-unsigned` (вкладка Actions → нужный запуск → Artifacts).
+
+Дальше с обычного ПК (Windows или Linux):
+
+1. Скачать артефакт `CBTDiary-ipa-unsigned` и распаковать `CBTDiary.ipa`.
+2. Установить **Sideloadly** (Windows/Linux) или **AltStore** (AltServer).
+3. Подключить iPhone по USB, в Sideloadly выбрать `CBTDiary.ipa`, ввести свой
+   Apple ID — он подпишет приложение и поставит его на телефон.
+
+Подпись бесплатного Apple ID живёт 7 дней — потом переустановить тем же способом.
+Если `com.petara94.cbtapp` окажется занят, в Sideloadly можно задать свой Bundle ID.
+
+В ЕС можно поставить **AltStore PAL** прямо на iPhone без компьютера (iOS 17.4+).
+
 ## Как включить iCloud-синхронизацию
 
 Требуется платный Apple Developer Program.
