@@ -7,11 +7,16 @@ struct CBTDiaryApp: App {
 
     init() {
         do {
-            // Автоматическая синхронизация через приватную базу CloudKit.
-            let config = ModelConfiguration(
-                "CBTDiary",
-                cloudKitDatabase: .automatic
-            )
+            // Локальное хранение (без CloudKit), чтобы приложение можно было
+            // подписать бесплатным Apple ID и запустить на устройстве.
+            //
+            // Чтобы включить синхронизацию через iCloud:
+            //  1. добавить таргету Capability «iCloud» c CloudKit (entitlements
+            //     уже лежат в CBTDiary.entitlements);
+            //  2. заменить конфигурацию ниже на:
+            //       ModelConfiguration("CBTDiary", cloudKitDatabase: .automatic)
+            //  Требуется платный аккаунт Apple Developer.
+            let config = ModelConfiguration("CBTDiary")
             container = try ModelContainer(
                 for: Entry.self, Feeling.self,
                 configurations: config
