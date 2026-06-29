@@ -25,7 +25,7 @@
 
 ## Запуск на iPhone (бесплатный Apple ID)
 
-1. Открыть `CBTDiary/CBTDiary.xcodeproj` в Xcode.
+1. Открыть `CBTDiary.xcodeproj` в Xcode.
 2. Xcode → Settings → Accounts — войти своим Apple ID.
 3. Таргет CBTDiary → Signing & Capabilities — выбрать свою Team,
    «Automatically manage signing». При необходимости поменять Bundle Identifier
@@ -65,20 +65,19 @@ CI на каждый push собирает **неподписанный `.ipa` �
 ## Структура проекта
 
 ```
+CBTDiary.xcodeproj          # проект (современный синхронизированный формат Xcode 16)
 CBTDiary/
-  CBTDiary.xcodeproj          # проект (современный синхронизированный формат Xcode 16)
-  CBTDiary/
-    CBTDiaryApp.swift         # точка входа, ModelContainer + CloudKit
-    Models/                   # Entry, Feeling (SwiftData), статичный контент
-    Views/                    # экраны и компоненты SwiftUI
-    Theme/                    # палитра, шрифты, форматирование дат
-    Assets.xcassets           # иконка, акцентный цвет
-    CBTDiary.entitlements     # iCloud / CloudKit
+  CBTDiaryApp.swift         # точка входа, ModelContainer + CloudKit
+  Models/                   # Entry, Feeling (SwiftData), статичный контент
+  Views/                    # экраны и компоненты SwiftUI
+  Theme/                    # палитра, шрифты, форматирование дат
+  Assets.xcassets           # иконка, акцентный цвет
+  CBTDiary.entitlements     # iCloud / CloudKit
 ```
 
 ## Сборка
 
-Открыть `CBTDiary/CBTDiary.xcodeproj` в Xcode и запустить на симуляторе iOS 18.
+Открыть `CBTDiary.xcodeproj` в Xcode и запустить на симуляторе iOS 18.
 
 CI (`.github/workflows/ios.yml`) на каждый push собирает приложение под
 iOS Simulator без подписи и выкладывает `.app` как артефакт сборки.

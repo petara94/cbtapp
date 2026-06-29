@@ -33,7 +33,6 @@ jobs:
           swift --version
 
       - name: Build for simulator (unsigned)
-        working-directory: CBTDiary
         run: |
           xcodebuild \
             -project CBTDiary.xcodeproj \
@@ -49,11 +48,10 @@ jobs:
 
       - name: Locate built .app
         id: app
-        working-directory: CBTDiary
         run: |
           APP_PATH=$(find build/Build/Products -name "*.app" -maxdepth 3 -type d | head -1)
           echo "Built: $APP_PATH"
-          echo "path=CBTDiary/$APP_PATH" >> "$GITHUB_OUTPUT"
+          echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Upload .app artifact (simulator)
         uses: actions/upload-artifact@v4
@@ -68,7 +66,6 @@ jobs:
       # tool re-signs the app with your own Apple ID. No Mac required.
 
       - name: Build for device (unsigned)
-        working-directory: CBTDiary
         run: |
           xcodebuild \
             -project CBTDiary.xcodeproj \
@@ -84,7 +81,6 @@ jobs:
 
       - name: Package unsigned .ipa
         id: ipa
-        working-directory: CBTDiary
         run: |
           APP_PATH=$(find build-device/Build/Products -name "*.app" -maxdepth 3 -type d | head -1)
           echo "Packaging: $APP_PATH"
@@ -99,5 +95,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CBTDiary-ipa-unsigned
-          path: CBTDiary/CBTDiary.ipa
+          path: CBTDiary.ipa
           if-no-files-found: error
