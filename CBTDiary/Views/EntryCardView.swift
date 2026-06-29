@@ -46,6 +46,9 @@ struct EntryCardView: View {
                     item(label: "Событие", color: Palette.event, text: entry.event)
                     item(label: "Мысль", color: Palette.thought, text: entry.thought)
                     feelingItem
+                    if !entry.note.isEmpty {
+                        item(label: "Заметка", color: Palette.note, text: entry.note)
+                    }
                 }
             }
         }

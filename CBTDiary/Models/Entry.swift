@@ -11,6 +11,8 @@ final class Entry {
     var createdAt: Date = Date()
     var event: String = ""
     var thought: String = ""
+    /// Свободная заметка: всё, что не вошло в структуру событие→мысль→чувство.
+    var note: String = ""
 
     @Relationship(deleteRule: .cascade, inverse: \Feeling.entry)
     var feelings: [Feeling]? = []
@@ -20,12 +22,14 @@ final class Entry {
         createdAt: Date = Date(),
         event: String = "",
         thought: String = "",
+        note: String = "",
         feelings: [Feeling] = []
     ) {
         self.id = id
         self.createdAt = createdAt
         self.event = event
         self.thought = thought
+        self.note = note
         self.feelings = feelings
     }
 

@@ -19,6 +19,7 @@ enum JournalPDF {
         let event = UIColor(hex: 0x2E5F5B)
         let thought = UIColor(hex: 0xAE7A2C)
         let feeling = UIColor(hex: 0xBB5D4C)
+        let note = UIColor(hex: 0x5E5A52)
 
         func serif(_ size: CGFloat, bold: Bool = true) -> UIFont {
             UIFont(name: bold ? "Georgia-Bold" : "Georgia", size: size)
@@ -83,7 +84,12 @@ enum JournalPDF {
                     let feelings = e.sortedFeelings
                     draw(attr("ЧУВСТВО", .systemFont(ofSize: 10, weight: .bold), feeling, kern: 1.1), spacingAfter: 3)
                     let ftext = feelings.isEmpty ? "—" : feelings.map { "\($0.name) · \($0.intensity)" }.joined(separator: "    ")
-                    draw(attr(ftext, .systemFont(ofSize: 13), ink, lineSpacing: 3), spacingAfter: 18)
+                    draw(attr(ftext, .systemFont(ofSize: 13), ink, lineSpacing: 3), spacingAfter: e.note.isEmpty ? 18 : 9)
+
+                    if !e.note.isEmpty {
+                        draw(attr("ЗАМЕТКА", .systemFont(ofSize: 10, weight: .bold), note, kern: 1.1), spacingAfter: 3)
+                        draw(attr(e.note, .systemFont(ofSize: 13), ink, lineSpacing: 3), spacingAfter: 18)
+                    }
                 }
             }
         }

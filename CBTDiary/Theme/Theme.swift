@@ -14,10 +14,12 @@ enum Palette {
     static let event = Color(hex: 0x2E5F5B)
     static let thought = Color(hex: 0xAE7A2C)
     static let feeling = Color(hex: 0xBB5D4C)
+    static let note = Color(hex: 0x5E5A52)
 
     static let eventTint = Color(hex: 0xE3ECEA)
     static let thoughtTint = Color(hex: 0xF2E8D6)
     static let feelingTint = Color(hex: 0xF4E2DD)
+    static let noteTint = Color(hex: 0xEAE6DE)
 }
 
 extension Color {
